@@ -39,6 +39,10 @@ class AsyncTask(models.Model):
     started_at = models.DateTimeField(blank=True, null=True)
     ended_at   = models.DateTimeField(blank=True, null=True)
 
+    class Meta:
+        app_label = "Async Queue"
+        verbose_name = "Task"
+
     @property
     def is_successful(self):
         if self.status not in ['done', 'failed']: return None
@@ -136,6 +140,10 @@ class AsyncTaskError(models.Model):
     task       = models.ForeignKey(AsyncTask, related_name='errors')
     error      = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = "Async Queue"
+        verbose_name = "Error"
 
     def __unicode__(self):
         return self.task.name
