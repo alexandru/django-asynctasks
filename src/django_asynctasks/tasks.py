@@ -6,15 +6,19 @@ from functools import wraps
 from inspect import getargspec
 from django_asynctasks.models import AsyncTask
 
-def task(label, when=None):
-    if not when: 
-        when = datetime.now()
+def task(label, schedule=None, bucket=None):
+    if not schedule: 
+        schedule = 'onetime'
+    if not bucket:
+        bucket = '__default__'
 
     def wrap(f):
+        function_namespace = f.__module__ + "." + f.__name__
+
         @wraps(f)
         def delay(self, *args, **kwargs):
-            namespace = f.__module__ + "." + f.__name__
-            return AsyncTask.schedule(namespace, args=args, kwargs=kwargs, when=when, label=label)
+            return AsyncTask.schedule(function_namespace, args=args, kwargs=kwargs, 
+                                      when='onetime', label=label, bucket=bucket)
         delay.argspec = getargspec(f)
 
         @wraps(f)
@@ -22,7 +26,7 @@ def task(label, when=None):
             return f(*args, **kwargs)
         run.argspec = getargspec(f)
 
-        cls_dict = dict(run=run, delay=delay, __module__=f.__module__, when=when, label=label)
+        cls_dict = dict(run=run, delay=delay, __module__=f.__module__, schedule=schedule, label=label)
         return type(f.__name__, (Task,), cls_dict)()
     return wrap
 
