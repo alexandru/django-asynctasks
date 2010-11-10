@@ -16,14 +16,15 @@ class Job(BaseJob):
             if settings.DEBUG: sys.stderr.write("Cannot acquire lock\n")
             return
 
-        while True:
-            next_task = AsyncTask.objects.filter(status='new', task_type='onetime', starts_at__lte=datetime.now())[:1]
-            if not next_task: break
+        try:
+            while True:
+                next_task = AsyncTask.objects.filter(status='new', task_type='onetime', starts_at__lte=datetime.now())[:1]
+                if not next_task: break
 
-            try:
-                next_task = next_task[0]
-                next_task.execute()
-            except:
-                sys.stderr.write("ERROR: Task \"%s\" failed (see admin logs for details)\n" % next_task.name)
-
-        lock.release()
+                try:
+                    next_task = next_task[0]
+                    next_task.execute()
+                except:
+                    sys.stderr.write("ERROR: Task \"%s\" failed (see admin logs for details)\n" % next_task.name)
+        finally:
+            lock.release()

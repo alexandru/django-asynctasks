@@ -5,7 +5,6 @@ import json, sys, traceback
 from django.db import models
 from datetime import datetime
 from django_asynctasks.utils import import_namespace
-from django_asynctasks.locks import FileLock
 from django.core.mail import mail_admins
 from django.conf import settings
 
@@ -95,11 +94,6 @@ class AsyncTask(models.Model):
 
 
     def execute(self):
-        lock_name = (self.name or '') + '-' + str(self.pk)
-        lock = FileLock(lock_name)
-
-        if not lock.acquire(): return False
-
         try:
             self.status = 'running'
             self.started_at = datetime.now()
@@ -128,8 +122,6 @@ class AsyncTask(models.Model):
             self.status = 'failed'
             self.save()
             raise
-        finally:
-            lock.release()
 
     def __unicode__(self):
         return self.name
