@@ -40,7 +40,6 @@ class AsyncTask(models.Model):
     ended_at   = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        app_label = "Async Queue"
         verbose_name = "Task"
 
     @property
@@ -142,7 +141,6 @@ class AsyncTaskError(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        app_label = "Async Queue"
         verbose_name = "Error"
 
     def __unicode__(self):
