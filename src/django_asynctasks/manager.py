@@ -6,7 +6,7 @@ from django_asynctasks.tasks import Task
 
 class AsyncManager(object):
     @classmethod
-    def get_tasks(bucket=None, schedule=None, status=None):
+    def get_tasks(self, bucket=None, schedule=None, status=None):
         rs = AsyncTask.objects.get_query_set()
         if bucket:
             rs = rs.filter(bucket=bucket)
