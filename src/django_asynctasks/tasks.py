@@ -21,15 +21,11 @@ def define(label, schedule=None, bucket=None, priority=2):
 
         @wraps(f)
         def delay(self, *args, **kwargs):
-            try:
-                override_priority = kwargs.pop('priority') or 2
-            except KeyError:
-                override_priority = priority
+            override_priority = kwargs.get('priority') or priority or 2
+            override_bucket   = kwargs.get('bucket') or bucket or None
 
-            try:
-                override_bucket = kwargs.pop('bucket') or None
-            except KeyError:
-                override_bucket = bucket
+            if not kwargs.get('priority'): kwargs['priority'] = override_priority
+            if not kwargs.get('bucket'):   kwargs['bucket']   = override_bucket
 
             return AsyncTask.schedule(function_namespace, args=args, kwargs=kwargs, 
                                       when='onetime', label=label, 
