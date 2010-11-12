@@ -6,7 +6,11 @@ from functools import wraps
 from inspect import getargspec
 from django_asynctasks.models import AsyncTask
 
-def task(label, schedule=None, bucket=None):
+HIGH=1
+NORMAL=2
+LOW=3
+
+def define(label, schedule=None, bucket=None, priority=2):
     if not schedule: 
         schedule = 'onetime'
     if not bucket:
@@ -17,8 +21,13 @@ def task(label, schedule=None, bucket=None):
 
         @wraps(f)
         def delay(self, *args, **kwargs):
+            try:
+                override = kwargs.pop('priority') or 2
+            except KeyError:
+                override = priority
+
             return AsyncTask.schedule(function_namespace, args=args, kwargs=kwargs, 
-                                      when='onetime', label=label, bucket=bucket)
+                                      when='onetime', label=label, bucket=bucket, priority=override)
         delay.argspec = getargspec(f)
 
         @wraps(f)
@@ -29,6 +38,7 @@ def task(label, schedule=None, bucket=None):
         cls_dict = dict(run=run, delay=delay, __module__=f.__module__, schedule=schedule, label=label)
         return type(f.__name__, (Task,), cls_dict)()
     return wrap
+
 
 class Task(object):    
     def run(self, *args, **kwargs):

@@ -1,7 +1,52 @@
 import os, re, shutil, sys
+from django.db import connections
+
+class AcquireLock:
+    def __init__(self, lock_name):
+        self.lock_name = lock_name
+
+        locker_cls = FileLock
+        connection = None
+
+        for conn in connections.all():
+            db_engine = conn.settings_dict['ENGINE']
+            if db_engine == 'django.db.backends.mysql':
+                locker_cls = MysqlLock
+                connection = conn
+                break
+
+        self.locker = locker_cls(lock_name=self.lock_name, connection=connection)
+
+    def __enter__(self):
+        return self.locker.acquire()
+
+    def __exit__(self, type, value, traceback):
+        self.locker.release()
+
+
+class MysqlLock:
+    def __init__(self, lock_name, connection):
+        self.lock_name = lock_name
+        self.conn      = connection
+
+    def acquire(self):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT GET_LOCK(%s, 0.5)", [self.lock_name])
+        row = cursor.fetchone()
+        return True if row and row[0] else False
+
+    def release(self):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT RELEASE_LOCK(%s)", [self.lock_name])
+        row = cursor.fetchone()
+        return True if row[0] else False
+
+    def __del__(self):
+        self.release()
+
 
 class FileLock:
-    def __init__(self, lock_name):
+    def __init__(self, lock_name, **kwargs):
         dirpath = os.path.join(_get_home_dir(), '.django_async.locks')
         if not os.path.exists(dirpath):
             os.mkdir(dirpath)

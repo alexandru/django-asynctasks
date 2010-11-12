@@ -20,6 +20,11 @@ TASK_STATUSES = (
     ('done', 'Done'),
     ('failed', 'Failed'),
 )
+TASK_PRIORITIRES = (
+    (3, 'Low'),
+    (2, 'Medium'),
+    (1, 'High'),
+)
 
 class AsyncTask(models.Model):
     name       = models.CharField(max_length=100)
@@ -31,12 +36,13 @@ class AsyncTask(models.Model):
     kwargs       = models.TextField()
     return_value = models.TextField(blank=True, null=True)
 
-    status     = models.CharField(max_length=10, default='new', choices=TASK_STATUSES)
-    starts_at  = models.DateTimeField()
+    status       = models.CharField(max_length=10, default='new', choices=TASK_STATUSES)
+    priority     = models.IntegerField(max_length=10, default=2, choices=TASK_PRIORITIRES)
+    starts_at    = models.DateTimeField()
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    started_at = models.DateTimeField(blank=True, null=True)
-    ended_at   = models.DateTimeField(blank=True, null=True)
+    created_at   = models.DateTimeField(auto_now_add=True)
+    started_at   = models.DateTimeField(blank=True, null=True)
+    ended_at     = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Task"
@@ -72,10 +78,12 @@ class AsyncTask(models.Model):
         return None
 
     @classmethod
-    def schedule(self, function_namespace, args, kwargs, when='hourly', label=None, bucket=None):
+    def schedule(self, function_namespace, args, kwargs, when='hourly', label=None, bucket=None, priority=2):
         task = AsyncTask()
 
-        task.name = label or function_namespace
+        task.name     = label or function_namespace
+        task.priority = priority
+
         if isinstance(when, datetime):
             task.task_type = 'onetime'
             task.starts_at = when            
@@ -91,7 +99,6 @@ class AsyncTask(models.Model):
 
         task.save()
         return task
-
 
     def execute(self):
         try:
