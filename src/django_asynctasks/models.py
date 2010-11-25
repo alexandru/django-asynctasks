@@ -19,6 +19,7 @@ TASK_STATUSES = (
     ('running', 'Running'),
     ('done', 'Done'),
     ('failed', 'Failed'),
+    ('stopped', 'Stopped'),
 )
 TASK_PRIORITIRES = (
     (3, 'Low'),

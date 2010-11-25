@@ -14,8 +14,8 @@ class AsyncTaskAdmin(admin.ModelAdmin):
             return "<span style='color: blue'><b>" + task.status + "</b></span>"
         if task.status == 'done':
             return "<span style='color: green'><b>DONE</b></span>"
-        if task.status == 'failed':
-            return "<span style='color: red'><b>FAILED</b></span>"
+        if task.status in ['failed', 'stopped']:
+            return "<span style='color: red'><b>%s</b></span>" % task.status.upper()
 
     formatted_status.allow_tags = True
     formatted_status.short_description = 'Status'
