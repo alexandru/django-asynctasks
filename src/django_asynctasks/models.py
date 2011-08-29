@@ -63,7 +63,9 @@ class AsyncTask(models.Model):
         return json.loads(self.args or [])
 
     def get_kwargs(self):
-        return json.loads(self.kwargs or {})
+        kwargs = json.loads(self.kwargs or {})
+        # transforming keys to simple strings
+        return dict([(str(k), kwargs[k]) for k in kwargs.keys()])
 
     def get_function(self):
         if self.function:
