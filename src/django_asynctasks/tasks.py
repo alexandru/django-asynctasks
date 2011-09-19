@@ -23,12 +23,14 @@ def define(label, schedule=None, bucket=None, priority=2):
         def delay(self, *args, **kwargs):
             override_priority = kwargs.get('priority') or priority or 2
             override_bucket   = kwargs.get('bucket') or bucket or None
+            when              = kwargs.get('when') or 'onetime'
 
             if not kwargs.get('priority'): kwargs['priority'] = override_priority
             if not kwargs.get('bucket'):   kwargs['bucket']   = override_bucket
 
             return AsyncTask.schedule(function_namespace, args=args, kwargs=kwargs, 
-                                      when='onetime', label=label, 
+                                      label=label,
+                                      when=when,
                                       bucket=override_bucket, 
                                       priority=override_priority)
         delay.argspec = getargspec(f)
