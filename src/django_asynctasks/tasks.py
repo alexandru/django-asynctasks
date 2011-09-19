@@ -23,7 +23,10 @@ def define(label, schedule=None, bucket=None, priority=2):
         def delay(self, *args, **kwargs):
             override_priority = kwargs.get('priority') or priority or 2
             override_bucket   = kwargs.get('bucket') or bucket or None
-            when              = kwargs.get('when') or 'onetime'
+
+            when = 'onetime'
+            if kwargs.get('when'):
+                when = kwargs.pop('when')
 
             if not kwargs.get('priority'): kwargs['priority'] = override_priority
             if not kwargs.get('bucket'):   kwargs['bucket']   = override_bucket
