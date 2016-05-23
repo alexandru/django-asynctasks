@@ -14,7 +14,7 @@ setup(
     install_requires = ['Django>=1.2.3', 'django-extensions>=0.5'],
 
     author = "Alexandru Nedelcu",
-    author_email = "me@alexn.org",
+    author_email = "noreply@alexn.org",
     description = """Django App that does asynchronous tasks processing.""",    
     license = "BSD",
     keywords = "django asynchronous tasks",
